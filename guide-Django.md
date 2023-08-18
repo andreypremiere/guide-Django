@@ -1,16 +1,16 @@
-# ���������� Django
+# Инструкция по Django
 ----
 
-## �������� �������
+## Основные команды
 ----
 
-__�������� �������__
+__Создание проекта__
 
 ```
 django-admin startproject nameproject
 ```
 
-__������ ��������� �������__
+__Запуск тестового сервера__
 
 ```
 python manage.py runserver
@@ -27,6 +27,28 @@ __Создание приложения__
 
 ```
 python manage.py startapp nameapp
+```
+
+__Миграции__
+
+Для создания и обновления таблиц определенных структур  в моделях.
+
+Создать файл миграций:
+
+```
+python manage.py makemigrations
+```
+
+Выполнить миграции:
+
+```
+python manage.py migrate
+```
+
+Посмотреть sql запрос, который будет выполнен для создания таблицы:
+
+```
+python manage.py sqlmigrate listuneversity(название модели) 0001(порядковый номер миграции)
 ```
 
 # Теория
@@ -79,4 +101,80 @@ return redirect('home') #!лучше передавать url адрес по и
 path('', index, name='home')
 ```
 
+__ORM__
+
+Объектно-реляционное отображение
+Благодаря django orm приложение может работать с такими базами как: SQLite, MySQL, PostgreSQL, Oracle, не прибегая к изменениям моделей.
+
+__Настройка базы данных__
+
+Находится в файле settings.py в пакете конфигураций.
+
+Прежде чем приступить к настройке подключения, убедитесь, что в вашей системе настроен MySQL. Убедитесь, что у вас есть учетная запись и созданы базы данных, к которым вы хотите подключиться.
+
+Более того, вам также потребуется клиент MySQL для взаимодействия с базами данных с помощью Python.
+
+```
+pip install mysqlclient
+```
+
+Также если не установлен пакет Pillow, его тоже потребуется установить.
+
+```
+python3 -m pip install --upgrade Pillow
+```
+
+Параметры в setting.py
+
+```
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql', 
+        'NAME': 'databaseName', # имя базы данных
+        'USER': 'databaseUser', # имя пользователя
+        'PASSWORD': 'databasePassword', # пароль
+        'HOST': 'localhost',
+        'PORT': 'portNumber', # больше дополнительный параметр
+    }
+}
+```
+
+__Модели данных__
+
+Чтобы в базе данных появилась таблица с определенной структурой, необходимо объявить класс в файле models.py пакета приложения с необходимыми полями и выполнить миграцию.
+
+Последовательность будет такая же, как в модели.
+
+Пример:
+
+```
+class Man(models.Model): # наследуем класс Model
+    title = models.CharField(max_length=256)
+    content = models.TextField(blank=True)
+    photo = models.ImageField(upload_to='photos/%Y/%n/%d') # в какой каталог будем загружать изображения с шаблоном
+    time_create = models.DateTimeField(auto_now_add=True)
+    is_published = models.BooleanField(default=False)
+```
+
+*id автоматически прописано в Model*
+
+Для загрузки различных файлов (в том числе и медиа) и корректной работы необходимо настроить MEDIA_ROOT и MEDIA_URL (подробнее смотреть в документации)
+
+Краткая инструкция:
+
+В пакете конфигураций settings.py добавляем описание этих констант:
+
+```
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # ссылается на папку media в текущем рабочем каталоге
+MEDIA_URL = '/media/' # добавляет к url графическим файлам такой префикс
+```
+
+Для передачи раннее загруженных медиа файлов нужно сэмулировать работу реального сервера.
+
+Для этого пропишем в urls пакета конфигураций:
+
+```
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+```
 
